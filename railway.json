@@ -1,0 +1,9 @@
+{
+    "build": {
+      "builder": "Docker",
+      "dockerfilePath": "Dockerfile"
+    },
+    "deploy": {
+      "startCommand": "node dist/main.js"
+    }
+  }
