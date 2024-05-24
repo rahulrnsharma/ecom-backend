@@ -30,8 +30,8 @@ async function bootstrap() {
     }
   }));
   app.enableCors();
-  console.log(process.env.DOC_BASE_URL,"this is base url")
-  console.log(process.env.DB_URL,"This is MongoDB URL")
+  // console.log(process.env.DOC_BASE_URL,"this is base url")
+  // console.log(process.env.DB_URL,"This is MongoDB URL")
   await app.listen(5000);
 }
 bootstrap();
