@@ -9,8 +9,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('v1');
   const config = new DocumentBuilder()
-    .setTitle('Grocery')
-    .setDescription('The grocery API description')
+    .setTitle('esale')
+    .setDescription('The esale API description')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
