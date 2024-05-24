@@ -27,4 +27,3 @@ jobs:
             git pull origin master
             npm ci --only=production  # Install production dependencies
             pm2 reload esale-api  # Replace with your app name (from PM2 config file)
-        
