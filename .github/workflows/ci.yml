@@ -23,7 +23,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            cd /path/to/your/project/directory  # Replace with actual deployment path
+            cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
             git pull origin master
             npm ci --only=production  # Install production dependencies
             pm2 reload esale-api  # Replace with your app name (from PM2 config file)
