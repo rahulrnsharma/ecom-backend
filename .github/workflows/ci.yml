@@ -13,7 +13,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 20.x  # Adjust Node.js version as needed
-      - run: npm install
+      - run: npm install --force 
       - run: npm run build  # Replace with your build command, if different
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
