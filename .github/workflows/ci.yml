@@ -1,0 +1,30 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20.x  # Adjust Node.js version as needed
+      - run: npm install
+      - run: npm run build  # Replace with your build command, if different
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /path/to/your/project/directory  # Replace with actual deployment path
+            git pull origin master
+            npm ci --only=production  # Install production dependencies
+            pm2 reload esale-api  # Replace with your app name (from PM2 config file)
+        

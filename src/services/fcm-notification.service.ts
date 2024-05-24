@@ -4,9 +4,9 @@ import { Model } from "mongoose";
 import { NotificationDto } from "src/dto/notification.dto";
 import { User, UserDocument, UserModel } from "src/schema/user.schema";
 const firebase = require("firebase-admin");
-//const serviceAccount = require('../../firebase-config.json')
+const serviceAccount = require('../../firebase-config.json')
 firebase.initializeApp({
-    //credential: firebase.credential.cert(serviceAccount),
+    credential: firebase.credential.cert(serviceAccount),
     databaseURL: "https://pmart-1a19a-default-rtdb.firebaseio.com"
 });
 
