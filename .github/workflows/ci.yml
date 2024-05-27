@@ -15,16 +15,30 @@ jobs:
           node-version: 20.x  # Adjust Node.js version as needed
       - run: npm install --force 
       - run: npm run build  # Replace with your build command, if different
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
+      - name: Transfer files to server
+        uses: appleboy/scp-action@v0.0.5
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: 22
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "dist/**, package.json, package-lock.json"
+          target: "/usr/share/nginx/ecom-backend"
           script: |
-            cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
-            git pull origin master 
             npm i --force
-            npm run build 
+            pm2 restart esale-api || pm2 start esale-api
+            pm2 save
+      # - name: Deploy to VPS
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.HOST }}
+      #     username: ${{ secrets.USERNAME }}
+      #     key: ${{ secrets.PRIVATE_KEY }}
+      #     port: 22
+      #     script: |
+      #       cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
+      #       git pull origin master 
+      #       npm i --force
+      #       npm run build 
+      #       pm2 restart esale-api || pm2 start esale-api
+      #       pm2 save
           
