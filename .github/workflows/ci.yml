@@ -25,5 +25,5 @@ jobs:
           script: |
             cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
             git pull origin master 
-            npm run build
+            npm run build 
           
