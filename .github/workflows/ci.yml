@@ -40,7 +40,7 @@ jobs:
             git pull origin master 
             npm install --force
             echo "npm install --force succuessfully done at cloud"
-
+            
       - name: Deploy to VPS
         if: success()
         uses: appleboy/ssh-action@master
