@@ -28,7 +28,7 @@ jobs:
         uses: appleboy/scp-action@v0.0.5
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }} 
+          username: ${{ secrets.USERNAME }}  
           key: ${{ secrets.PRIVATE_KEY }}
           source: "dist/**, package.json, package-lock.json"
           target: "/usr/share/nginx/ecom-backend"
