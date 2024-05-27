@@ -26,4 +26,4 @@ jobs:
             cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
             git pull origin master 
             npm run build
-            pm2 restart esale-api  # Replace with your app name (from PM2 config file)
+          
