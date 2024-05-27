@@ -24,9 +24,20 @@ jobs:
           source: "dist/**, package.json, package-lock.json"
           target: "/usr/share/nginx/ecom-backend"
           script: |
-            npm i --force
-            pm2 restart esale-api || pm2 start esale-api
-            pm2 save
+            echo "File transferred successfully."
+          debug: true 
+      - name: SSH into server and extract TAR file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}# Use the SSH key secret here
+          port: 22
+          script: |
+            cd /usr/share/nginx/ecom-backend
+            tar -xf rff6xnjO4o.tar
+            rm rff6xnjO4o.tar
+          debug: true  # Enable debug mode for more verbose logs
       # - name: Deploy to VPS
       #   uses: appleboy/ssh-action@master
       #   with:
