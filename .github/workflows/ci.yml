@@ -27,6 +27,7 @@ jobs:
           echo "npm build succuessfully done at github actions"
 
       - name: Install Packages At Cloud
+        if: steps.package-json-check.outputs.modified
         uses: appleboy/ssh-action@master
         with:
           if: steps.package-json-check.outputs.modified
