@@ -51,9 +51,6 @@ jobs:
           script: |
             cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
             git pull origin master 
-            npm i --force
-            echo
-            npm run build 
             pm2 restart esale-api || pm2 start esale-api
             pm2 save
             echo "Deploy succuessfully done at cloud and pm2 restart is done"
