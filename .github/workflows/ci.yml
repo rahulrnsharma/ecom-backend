@@ -38,3 +38,4 @@ jobs:
 
       - name: Restart application
         run: ssh ${{ secrets.USERNAME }}@${{ secrets.HOST }} 'pm2 restart esale-api || pm2 start esale-api' 
+ 
