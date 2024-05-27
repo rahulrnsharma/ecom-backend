@@ -40,7 +40,7 @@ jobs:
             git pull origin master 
             npm install --force
             echo "npm install --force succuessfully done at cloud"
-            
+             
       - name: Deploy to VPS
         if: success()
         uses: appleboy/ssh-action@master
@@ -50,7 +50,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
+            cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path here
             git pull origin master
             npm i --force
             npm run build 
