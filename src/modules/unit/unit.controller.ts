@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiExcludeEndpoint, ApiParam, ApiTags } from '@nestjs/swagger';
 import { HasRoles } from 'src/decorator/role.decorator';
 import { ScopeUser } from 'src/decorator/user.decorator';
-import { UnitDto } from 'src/dto/unit.dto';
+import { SearchUnitDto, UnitDto } from 'src/dto/unit.dto';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
 import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
@@ -29,8 +29,8 @@ export class UnitController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get('')
-    getAll() {
-        return this.unitService.getAll();
+    getAll(@Query() query: SearchUnitDto) {
+        return this.unitService.getAll(query);
     }
     @HasRoles(RoleEnum.ADMIN)
     @ApiBearerAuth()

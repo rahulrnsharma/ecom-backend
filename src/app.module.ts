@@ -61,6 +61,6 @@ const MODULES = [
   ],
   controllers: [AppController],
   providers: [],
-  exports: [] 
+  exports: []
 })
 export class AppModule { }

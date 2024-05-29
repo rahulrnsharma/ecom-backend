@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Post, Put, Delete, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Delete, Param, UseGuards, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { HasRoles } from 'src/decorator/role.decorator';
 import { ScopeUser } from 'src/decorator/user.decorator';
-import { CouponDto } from 'src/dto/coupon.dto';
+import { CouponDto, SearchCouponDto } from 'src/dto/coupon.dto';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
 import { CouponService } from 'src/services/coupon.service';
@@ -25,8 +25,8 @@ export class CouponController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get('')
-    getAll() {
-        return this.couponService.getAll();
+    getAll(@Query() query: SearchCouponDto) {
+        return this.couponService.getAll(query);
     }
     @HasRoles(RoleEnum.ADMIN)
     @ApiBearerAuth()

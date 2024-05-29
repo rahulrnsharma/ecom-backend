@@ -11,7 +11,6 @@ export class AppDatabaseModule {
 
     public static forRootConnection() {
         if (!this.mongoDbConnectionModule) {
-            // console.log('creating connection module');
             this.mongoDbConnectionModule = MongooseModule.forRootAsync({
                 useClass: MongooseConfigService,
             });
@@ -21,7 +20,6 @@ export class AppDatabaseModule {
 
     public static forFeatureAsync() {
         if (!this.mongoDbAllSchemaModule) {
-            // console.log('creating schema module');
             this.mongoDbAllSchemaModule = MongooseModule.forFeature(ALL_SCHEMA);
         }
         return this.mongoDbAllSchemaModule;

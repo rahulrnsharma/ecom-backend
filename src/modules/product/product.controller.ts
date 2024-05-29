@@ -8,6 +8,7 @@ import { AdminSearchProductDto, ExcelFileDto, ProductDto, ProductImageDto, Searc
 import { ReviewDto } from 'src/dto/review.dto';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
+import { FirbaseAuthGuard } from 'src/services/guard/firebase.guard';
 import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/services/guard/role.guard';
 import { ProductService } from 'src/services/product.service';
@@ -50,21 +51,30 @@ export class ProductController {
 
   @HasRoles(RoleEnum.USER)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(FirbaseAuthGuard, RolesGuard)
   @Get('search')
   async search(@Query() query: SearchProductDto) {
     return this.productService.search(query);
   }
+
   @HasRoles(RoleEnum.USER)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(FirbaseAuthGuard, RolesGuard)
+  @Get('home')
+  async home(@Query() query: TimezoneDto) {
+    return this.productService.home(query);
+  }
+
+  @HasRoles(RoleEnum.USER)
+  @ApiBearerAuth()
+  @UseGuards(FirbaseAuthGuard, RolesGuard)
   @Get('autocomplete')
   async autocomplete(@Query('search') search: string) {
     return this.productService.autocomplete(search);
   }
   @HasRoles(RoleEnum.USER)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(FirbaseAuthGuard, RolesGuard)
   @Get('detail/:id')
   @ApiParam({ name: 'id' })
   async detail(@Param('id') id: string, @Query() query: TimezoneDto) {
@@ -94,27 +104,43 @@ export class ProductController {
   async getById(@Param('id') id: string) {
     return this.productService.getById(id);
   }
-  @HasRoles(RoleEnum.USER, RoleEnum.ADMIN)
+  @HasRoles(RoleEnum.ADMIN)
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('admin/:id/gallery')
+  @ApiParam({ name: 'id' })
+  async getProductImagesAdmin(@Param('id') id: string) {
+    return this.productService.getProductImages(id);
+  }
+  @HasRoles(RoleEnum.USER)
+  @ApiBearerAuth()
+  @UseGuards(FirbaseAuthGuard, RolesGuard)
   @Get(':id/gallery')
   @ApiParam({ name: 'id' })
   async getProductImages(@Param('id') id: string) {
     return this.productService.getProductImages(id);
   }
 
-  @HasRoles(RoleEnum.USER, RoleEnum.ADMIN)
+  @HasRoles(RoleEnum.USER)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(FirbaseAuthGuard, RolesGuard)
   @Get(':id/review')
   @ApiParam({ name: 'id' })
   async getProductReview(@Param('id') id: string, @ScopeUser() contextUser: IContextUser) {
     return this.productService.getReview(id, contextUser);
   }
+  @HasRoles(RoleEnum.ADMIN)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('admin/:id/review')
+  @ApiParam({ name: 'id' })
+  async getProductReviewAdmin(@Param('id') id: string, @ScopeUser() contextUser: IContextUser) {
+    return this.productService.getReview(id, contextUser);
+  }
 
   @HasRoles(RoleEnum.USER)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(FirbaseAuthGuard, RolesGuard)
   @Put(':id/review')
   @ApiParam({ name: 'id' })
   async review(@Param('id') id: string, @Body() reviewDto: ReviewDto, @ScopeUser() contextUser: IContextUser) {

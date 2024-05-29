@@ -17,13 +17,15 @@ import { Order, OrderDocument, OrderModel } from "src/schema/order.schema";
 import { TransactionDocument, TransactionModel } from "src/schema/transaction.schema";
 import { UserProfileDocument, UserProfileModel } from "src/schema/user-profile.schema";
 import { ApiConfigService } from "./config.service";
-import { FcmNotificationService } from "./fcm-notification.service";
+import { FirebaseService } from "./firebase.service";
 import { SiteConfigService } from "./site-config.service";
 import { UserCartService } from "./user-cart.service";
 import { UtilityService } from "./utility.service";
 import { NotificationScreenEnum } from "src/enum/notification.enum";
 import { OrderReviewDocument, OrderReviewModel } from "src/schema/order-review.schema";
 import { ReviewDto } from "src/dto/review.dto";
+import { NotificationDto } from "src/dto/notification.dto";
+import { User, UserDocument, UserModel } from "src/schema/user.schema";
 const Razorpay = require('razorpay');
 
 @Injectable()
@@ -34,9 +36,10 @@ export class OrderService {
         @InjectModel(TransactionModel.name) private transactionModel: Model<TransactionDocument>,
         @InjectModel(UserProfileModel.name) private userProfileModel: Model<UserProfileDocument>,
         @InjectModel(OrderReviewModel.name) private orderReviewModel: Model<OrderReviewDocument>,
+        @InjectModel(UserModel.name) private userModel: Model<UserDocument>,
         private readonly utilityService: UtilityService, private readonly userCartService: UserCartService,
         private readonly siteConfigService: SiteConfigService, private apiConfigService: ApiConfigService,
-        private eventEmitter: EventEmitter2, private fcmNotificationService: FcmNotificationService) { }
+        private eventEmitter: EventEmitter2, private firebaseService: FirebaseService) { }
 
     async getAllByUser(searchDto: SearchOrderHistoryDto, contextUser: any): Promise<PaginationResponse<any>> {
         let _match: any = { isActive: true }
@@ -232,7 +235,7 @@ export class OrderService {
         const _doc: Order = await this.orderModel.findByIdAndUpdate(id, { $set: { status: status, updatedBy: contextUser.userId }, $push: { 'timeline': { status: status, summary: `order has been ${status.toLowerCase()}.` } } }, { runValidators: true }).exec();
         if (_doc) {
             this.eventEmitter.emit(OrderEventEnum.STATUSCHANGE, { orderId: id, status: status, user: _doc.user });
-            this.fcmNotificationService.send(_doc.user, { notification: { title: `Order ${status}`, body: `order(${_doc.number}) has been ${status.toLowerCase()}.` }, data: { url: `pmart://${NotificationScreenEnum.ORDERDETAIL}/${id}` } });
+            this.sendNotification(_doc.user, { notification: { title: `Order ${status}`, body: `order(${_doc.number}) has been ${status.toLowerCase()}.` }, data: { url: `pmart://${NotificationScreenEnum.ORDERDETAIL}/${id}` } });
             return { success: true }
         }
         else {
@@ -243,7 +246,7 @@ export class OrderService {
         const _doc: Order = await this.orderModel.findByIdAndUpdate(id, { $set: { ...orderUpdateStatusWithReasonDto, updatedBy: contextUser.userId }, $push: { 'timeline': { status: orderUpdateStatusWithReasonDto.status, summary: `order has been ${orderUpdateStatusWithReasonDto.status.toLowerCase()}.`, remark: orderUpdateStatusWithReasonDto.reason } } }, { runValidators: true }).exec();
         if (_doc) {
             this.eventEmitter.emit(OrderEventEnum.STATUSCHANGE, { orderId: id, status: orderUpdateStatusWithReasonDto.status, reason: orderUpdateStatusWithReasonDto.reason, user: _doc.user });
-            this.fcmNotificationService.send(_doc.user, { notification: { title: `Order ${orderUpdateStatusWithReasonDto.status}`, body: `order(${_doc.number}) has been ${orderUpdateStatusWithReasonDto.status.toLowerCase()}.` }, data: { url: `pmart://${NotificationScreenEnum.ORDERDETAIL}/${id}` } });
+            this.sendNotification(_doc.user, { notification: { title: `Order ${orderUpdateStatusWithReasonDto.status}`, body: `order(${_doc.number}) has been ${orderUpdateStatusWithReasonDto.status.toLowerCase()}.` }, data: { url: `pmart://${NotificationScreenEnum.ORDERDETAIL}/${id}` } });
             return { success: true }
         }
         else {
@@ -255,11 +258,11 @@ export class OrderService {
         const _doc: Order = await this.orderModel.findByIdAndUpdate(orderAssignDto.order, { $set: { assign: orderAssignDto.user, assigneeFee: userProfile.commission, updatedBy: contextUser.userId } }, { runValidators: true }).exec();
         if (_doc) {
             this.eventEmitter.emit(OrderEventEnum.ORDERASSIGN, { orderId: orderAssignDto.order, user: _doc.user });
-            this.fcmNotificationService.send(_doc.user, { notification: { title: `Order Assign`, body: `order(${_doc.number}) has been assign to delivery.` }, data: { url: `pmart://${NotificationScreenEnum.ORDERDETAIL}/${orderAssignDto.order}` } });
+            this.sendNotification(_doc.user, { notification: { title: `Order Assign`, body: `order(${_doc.number}) has been assign to delivery.` }, data: { url: `pmart://${NotificationScreenEnum.ORDERDETAIL}/${orderAssignDto.order}` } });
             return _doc
         }
         else {
-            throw new BadRequestException("Resource you are Updating not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async track(orderId: any, locationDto: LocationDto) {
@@ -270,7 +273,7 @@ export class OrderService {
             return { success: true }
         }
         else {
-            throw new BadRequestException("Resource you are Updating not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async updateUserWallet(userId: any, ammount: number, order: any) {
@@ -336,5 +339,11 @@ export class OrderService {
         query.push(this.utilityService.getProjectPipeline({ _id: 0, count: 1, earning: 1 }, false));
         let _res: any[] = await this.orderModel.aggregate(query);
         return _res[0] || {};
+    }
+    private async sendNotification(id: any, notification: NotificationDto) {
+        const user: User = await this.userModel.findById(id).exec();
+        if (user && user.device) {
+            this.firebaseService.sendNotification(user.device.deviceToken, notification);
+        }
     }
 }

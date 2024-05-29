@@ -3,7 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import { HasRoles } from 'src/decorator/role.decorator';
 import { ScopeUser } from 'src/decorator/user.decorator';
-import { CategoryDto, SearchCategoryDto } from 'src/dto/category.dto';
+import { CategoryDto, HomeCategoryDto, SearchCategoryDto } from 'src/dto/category.dto';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
 import { CategoryService } from 'src/services/category.service';
@@ -50,6 +50,14 @@ export class CategoryController {
   @ApiParam({ name: 'id' })
   async getById(@Param('id') id: string) {
     return this.categoryService.getById(id);
+  }
+  @HasRoles(RoleEnum.ADMIN)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put(':id/home')
+  @ApiParam({ name: 'id' })
+  async home(@Param('id') id: string, @Body() homeCategoryDto: HomeCategoryDto, @ScopeUser() contextUser: IContextUser) {
+    return this.categoryService.updateHome(id, homeCategoryDto.home, contextUser);
   }
 
   @HasRoles(RoleEnum.ADMIN)

@@ -1,6 +1,6 @@
 import { ApiPropertyOptional, ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsIn, IsMongoId, IsNotEmpty, IsString, ValidateIf } from "class-validator";
+import { IsBoolean, IsIn, IsMongoId, IsNotEmpty, IsString, ValidateIf } from "class-validator";
 import { Types } from "mongoose";
 import { ActiveStatusEnum } from "src/enum/common.enum";
 import { PaginationDto } from "./pagination.dto";
@@ -37,4 +37,10 @@ export class SearchCategoryDto extends PaginationDto {
     @IsString({ message: 'Active should be string.' })
     @ValidateIf(o => o.status)
     status?: string;
+}
+export class HomeCategoryDto {
+    @ApiProperty()
+    @IsBoolean({ message: 'Should be boolean.' })
+    @Type(() => Boolean)
+    home: boolean;
 }

@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsIn, IsInt, IsNotEmpty, IsString } from "class-validator";
+import { IsIn, IsInt, IsNotEmpty, IsString, ValidateIf } from "class-validator";
 import { EqualToIf } from "src/decorator/validation/comparison.decorator";
-import { OfferTypeEnum } from "src/enum/common.enum";
+import { ActiveStatusEnum, OfferTypeEnum } from "src/enum/common.enum";
 import { CouponUsedTypeEnum } from "src/enum/coupon.enum";
 
 export class CouponDto {
@@ -50,4 +50,11 @@ export class CouponValidateDto {
     @IsNotEmpty({ message: 'Amount is required.' })
     @Type(() => Number)
     amount: number;
+}
+export class SearchCouponDto {
+    @ApiPropertyOptional({ enum: Object.values(ActiveStatusEnum) })
+    @IsIn(Object.values(ActiveStatusEnum))
+    @IsString({ message: 'Active should be string.' })
+    @ValidateIf(o => o.status)
+    status?: string;
 }

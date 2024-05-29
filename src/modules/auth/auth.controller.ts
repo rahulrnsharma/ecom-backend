@@ -9,6 +9,7 @@ import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
 import { LocalAuthGuard } from 'src/services/guard/local-auth.guard';
 import { RolesGuard } from 'src/services/guard/role.guard';
 import { AdminLoginDto, AuthCheckDto, PasswordDto, LoginDto, AdminUserCreateDto, DeviceInfoDto } from '../../dto/login.dto';
+import { FirbaseAuthGuard } from 'src/services/guard/firebase.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -16,8 +17,8 @@ export class AuthController {
     constructor(
         private authService: AuthService
     ) { }
- 
-    //@ApiExcludeEndpoint()
+
+    @ApiExcludeEndpoint()
     @Post('create-admin')
     createAdmin(@Body() adminUserCreateDto: AdminUserCreateDto) {
         return this.authService.createAdmin(adminUserCreateDto);
@@ -31,34 +32,54 @@ export class AuthController {
     async authCheck(@Body() authCheckDto: AuthCheckDto) {
         return this.authService.authCheck(authCheckDto);
     }
-    @Post('login')
-    async login(@Body() loginDto: LoginDto) {
-        return this.authService.login(loginDto);
-    }
+    // @Post('login')
+    // async login(@Body() loginDto: LoginDto) {
+    //     return this.authService.login(loginDto);
+    // }
+    // @ApiBearerAuth()
+    // @UseGuards(FirbaseAuthGuard)
+    // @Post('validate')
+    // async validate(@ScopeUser() contextUser: IContextUser) {
+    //     return contextUser;
+    // }
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(FirbaseAuthGuard)
     @Post('logout')
     logout(@ScopeUser() contextUser: IContextUser) {
         return this.authService.logout(contextUser);
     }
-    @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Post('set-password')
-    async setUserPassword(@Body() passwordDto: PasswordDto, @ScopeUser() contextUser: IContextUser) {
-        return this.authService.setUserPassword(passwordDto, contextUser);
+    @UseGuards(JwtAuthGuard)
+    @Post('admin/logout')
+    adminLogout(@ScopeUser() contextUser: IContextUser) {
+        return this.authService.logout(contextUser);
     }
+    // @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
+    // @ApiBearerAuth()
+    // @UseGuards(JwtAuthGuard, RolesGuard)
+    // @Post('set-password')
+    // async setUserPassword(@Body() passwordDto: PasswordDto, @ScopeUser() contextUser: IContextUser) {
+    //     return this.authService.setUserPassword(passwordDto, contextUser);
+    // }
     @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Post('device')
     async device(@Body() deviceInfoDto: DeviceInfoDto, @ScopeUser() contextUser: IContextUser) {
         return this.authService.updateDevice(deviceInfoDto, contextUser);
     }
 
-    @HasRoles(RoleEnum.ADMIN, RoleEnum.USER, RoleEnum.DELIVERY, RoleEnum.DATAMANAGEMENT)
+    @HasRoles(RoleEnum.ADMIN, RoleEnum.DATAMANAGEMENT)
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get('admin/profile')
+    profileAdmin(@ScopeUser() contextUser: IContextUser) {
+        return this.authService.profile(contextUser);
+    }
+
+    @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
+    @ApiBearerAuth()
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('profile')
     profile(@ScopeUser() contextUser: IContextUser) {
         return this.authService.profile(contextUser);

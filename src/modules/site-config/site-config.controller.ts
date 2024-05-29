@@ -5,6 +5,7 @@ import { ScopeUser } from 'src/decorator/user.decorator';
 import { SiteConfigDto } from 'src/dto/site-config.dto';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
+import { FirbaseAuthGuard } from 'src/services/guard/firebase.guard';
 import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/services/guard/role.guard';
 import { SiteConfigService } from 'src/services/site-config.service';
@@ -23,7 +24,7 @@ export class SiteConfigController {
     }
     @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('detail')
     getSiteConfig() {
         return this.siteConfigService.getSiteConfig();

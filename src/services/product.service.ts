@@ -6,15 +6,18 @@ import { IContextUser } from "src/interface/user.interface";
 import { PaginationResponse } from "src/model/pagination.model";
 import { Product, ProductDocument, ProductModel } from "src/schema/product.schema";
 import { UtilityService } from "./utility.service";
-import { ActiveStatusEnum, OfferTypeEnum } from "src/enum/common.enum";
+import { ActiveStatusEnum, OfferTypeEnum, SortOrderEnum } from "src/enum/common.enum";
 import { ReviewDto } from "src/dto/review.dto";
 import { ProductReviewDocument, ProductReviewModel } from "src/schema/product-review.schema";
 import { ProductStockDocument, ProductStockModel } from "src/schema/product-stock.schema";
+import { TimezoneDto } from "src/dto/pagination.dto";
+import { CategoryDocument, CategoryModel } from "src/schema/category.schema";
 
 @Injectable()
 export class ProductService {
     constructor(
         @InjectModel(ProductModel.name) private productModel: Model<ProductDocument>,
+        @InjectModel(CategoryModel.name) private categoryModel: Model<CategoryDocument>,
         @InjectModel(ProductStockModel.name) private productStockModel: Model<ProductStockDocument>,
         @InjectModel(ProductReviewModel.name) private productReviewModel: Model<ProductReviewDocument>,
         private readonly utilityService: UtilityService
@@ -44,7 +47,7 @@ export class ProductService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async delete(id: any, contextUser: IContextUser) {
@@ -53,7 +56,7 @@ export class ProductService {
             return { success: true }
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
     async getAll(searchDto: AdminSearchProductDto): Promise<PaginationResponse<any>> {
@@ -119,7 +122,7 @@ export class ProductService {
             return { success: true };
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async search(searchDto: SearchProductDto): Promise<PaginationResponse<any>> {
@@ -178,6 +181,38 @@ export class ProductService {
         let _res: any[] = await this.productModel.aggregate(query).exec();
         return new PaginationResponse(_res[0].data, _res[0].count, searchDto.currentPage, searchDto.pageSize);
     }
+    async home(searchDto: TimezoneDto) {
+        let _today: Date = this.utilityService.setStartHour(new Date(), searchDto.timezone);
+        let query: PipelineStage[] = [this.utilityService.getMatchPipeline({ isActive: true, home: true })];
+        query.push(this.utilityService.getLookupPipeline('products', '_id', 'category', 'products', [
+            this.utilityService.getMatchPipeline({ isActive: true, status: 'Published' }),
+            this.utilityService.getLookupPipeline('brands', 'brand', '_id', 'brand', [this.utilityService.getMatchPipeline({ isActive: true }), this.utilityService.getProjectPipeline({ name: 1 }, false)]),
+            this.utilityService.getUnwindPipeline('brand'),
+            this.utilityService.getMatchPipeline({ "brand": { $ne: null } }),
+            this.utilityService.getSortPipeline('packing.sell', SortOrderEnum.ASC),
+            this.utilityService.getSkipPipeline(1, 5),
+            this.utilityService.getLimitPipeline(5),
+            this.utilityService.getLookupPipeline('units', 'unit', '_id', 'unit', [this.utilityService.getProjectPipeline({ name: 1, sortName: 1 }, false)]),
+            this.utilityService.getUnwindPipeline('unit'),
+            this.utilityService.getLookupPipeline('product-reviews', '_id', 'product', 'review', [this.utilityService.getGroupPipeline({ _id: "$product", total: { $sum: "$rating" }, count: { $sum: 1 } }), this.utilityService.getProjectPipeline({ count: "$count", rating: { $divide: ["$total", { $cond: { if: { $ne: ["$count", 0] }, then: "$count", else: 1 } }] } }, false)]),
+            this.utilityService.getUnwindPipeline('review'),
+            this.utilityService.getLookupPipeline('deals', 'deal', '_id', 'deal', [this.utilityService.getMatchPipeline({ isActive: true, $and: [{ startDate: { $lte: _today } }, { endDate: { $gt: _today } }] }), this.utilityService.getProjectPipeline({ name: 1, startDate: 1, endDate: 1, type: 1, offerType: 1, offer: 1, offerMax: 1, offerBuy: 1, offerGet: 1 }, false)]),
+            this.utilityService.getUnwindPipeline('deal'),
+            this.utilityService.getAddFieldPipeline('packing.sellAfterOffer', {
+                $cond: {
+                    if: { $ne: [{ $ifNull: ["$deal", null] }, null] }, then:
+                        { $subtract: ["$packing.sell", { $ifNull: [{ $min: ["$deal.offerMax", { $cond: { if: { $eq: ["$deal.offerType", OfferTypeEnum.PERCENTAGE] }, then: { $divide: [{ $multiply: ["$deal.offer", "$packing.sell"] }, 100] }, else: "$deal.offer" } }] }, 0] }] }
+                    , else: "$packing.sell"
+                }
+            }),
+            this.utilityService.getAddImageFieldPipeline('image', 'product', { $arrayElemAt: ["$gallery.image", 0] }),
+            this.utilityService.getProjectPipeline({ gallery: 0, category: 0 }, true)
+        ]));
+        query.push(this.utilityService.getProjectPipeline({ name: 1, image: this.utilityService.projectImageFeild("category", "$image"), products: 1 }, false));
+        let _res: any[] = await this.categoryModel.aggregate(query).exec();
+        return _res;
+    }
+
     async detail(id: any, timezone: number): Promise<any> {
         let _match: any = { _id: new Types.ObjectId(id) };
         let _today: Date = this.utilityService.setStartHour(new Date(), timezone);

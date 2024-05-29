@@ -10,6 +10,7 @@ import { SearchAdminUserDto, SearchUserDto, UserDto, UserImageDto, AmountDto } f
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
 import { AdminUserService } from 'src/services/admin-user.service';
+import { FirbaseAuthGuard } from 'src/services/guard/firebase.guard';
 import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/services/guard/role.guard';
 import { UserAddressService } from 'src/services/user-address.service';
@@ -27,7 +28,7 @@ export class UserController {
 
     @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Post('image')
     @ApiConsumes('multipart/form-data')
     @UseInterceptors(FileInterceptor('image', UtilityService.multerOptions("avatar", "avatar", "image", 2 * 1024 * 1024)))
@@ -36,7 +37,7 @@ export class UserController {
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Post('address')
     createAddress(@Body() addressDto: AddressDto, @ScopeUser() contextUser: IContextUser) {
         return this.userAddressService.create(addressDto, contextUser);
@@ -49,7 +50,7 @@ export class UserController {
 
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Post('wallet')
     addWallet(@Body() amountDto: AmountDto, @ScopeUser() contextUser: IContextUser) {
         return this.userService.createWallet(amountDto, contextUser);
@@ -95,14 +96,14 @@ export class UserController {
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('address')
     getAddress(@ScopeUser() contextUser: IContextUser) {
         return this.userAddressService.getAllByUser(contextUser);
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('address/:id')
     @ApiParam({ name: 'id', required: true, type: String })
     getAddressById(@Param('id') id: string) {
@@ -110,14 +111,14 @@ export class UserController {
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('wallet')
     getWallet(@ScopeUser() contextUser: IContextUser) {
         return this.userService.getWalletAmount(contextUser);
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('transaction')
     getTransaction(@ScopeUser() contextUser: IContextUser) {
         return this.userService.getTransaction(contextUser);
@@ -138,10 +139,18 @@ export class UserController {
     getUserDetailById(@Param('id') id: string) {
         return this.userService.getDetailById(id);
     }
-
-    @HasRoles(RoleEnum.USER, RoleEnum.ADMIN, RoleEnum.DELIVERY)
+    @HasRoles(RoleEnum.ADMIN)
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get('admin/:id/review')
+    @ApiParam({ name: 'id' })
+    async getProductReviewAdmin(@Param('id') id: string, @ScopeUser() contextUser: IContextUser) {
+        return this.userService.getReview(id, contextUser);
+    }
+
+    @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
+    @ApiBearerAuth()
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get(':id/review')
     @ApiParam({ name: 'id' })
     async getProductReview(@Param('id') id: string, @ScopeUser() contextUser: IContextUser) {
@@ -150,14 +159,14 @@ export class UserController {
 
     @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Put('')
     async updateUser(@Body() userDto: UserDto, @ScopeUser() contextUser: IContextUser) {
         return this.userService.updateUser({ ...userDto }, contextUser);
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Put('address/:id')
     @ApiParam({ name: 'id', required: true, type: String })
     updateAddress(@Param('id') id: string, @Body() addressDto: AddressDto, @ScopeUser() contextUser: IContextUser) {
@@ -166,7 +175,7 @@ export class UserController {
 
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Put(':id/review')
     @ApiParam({ name: 'id' })
     async review(@Param('id') id: string, @Body() reviewDto: ReviewDto, @ScopeUser() contextUser: IContextUser) {
@@ -183,7 +192,7 @@ export class UserController {
 
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Delete('address/:id')
     @ApiParam({ name: 'id', required: true, type: String })
     deleteAddress(@Param('id') id: string, @ScopeUser() contextUser: IContextUser) {

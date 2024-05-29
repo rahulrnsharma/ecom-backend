@@ -5,6 +5,8 @@ export interface IContextUser {
     loggedInId?: ObjectId;
     userId: ObjectId;
     roles: String[];
+    user_id?: string;
+    phone_number?: string;
 }
 
 export interface ISocket extends Socket {

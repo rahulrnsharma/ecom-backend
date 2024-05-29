@@ -9,6 +9,7 @@ import { ReviewDto } from 'src/dto/review.dto';
 import { OrderStatusEnum } from 'src/enum/order.enum';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
+import { FirbaseAuthGuard } from 'src/services/guard/firebase.guard';
 import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/services/guard/role.guard';
 import { OrderService } from 'src/services/order.service';
@@ -20,14 +21,14 @@ export class OrderController {
 
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Post('place')
     async place(@Body() orderDto: OrderDto, @ScopeUser() contextUser: IContextUser) {
         return this.orderService.place(orderDto, contextUser);
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Post('pending/place/:id')
     @ApiParam({ name: 'id' })
     async pendingPlace(@Param('id') id: string, @ScopeUser() contextUser: IContextUser) {
@@ -35,7 +36,7 @@ export class OrderController {
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Post('available')
     async available(@Body() address: AddressDto, @ScopeUser() contextUser: IContextUser) {
         return this.orderService.available(address, contextUser);
@@ -50,14 +51,14 @@ export class OrderController {
 
     @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('history')
     async getAllByUser(@Query() query: SearchOrderHistoryDto, @ScopeUser() contextUser: IContextUser) {
         return this.orderService.getAllByUser(query, contextUser);
     }
     @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('history/:id')
     @ApiParam({ name: 'id' })
     async detail(@Param('id') id: string) {
@@ -65,7 +66,7 @@ export class OrderController {
     }
     @HasRoles(RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('my-statics')
     async getMyStatics(@ScopeUser() contextUser: IContextUser) {
         return this.orderService.myStatics(contextUser.userId);
@@ -88,15 +89,23 @@ export class OrderController {
 
     @HasRoles(RoleEnum.DELIVERY)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Put('track/:id')
     @ApiParam({ name: 'id' })
     async track(@Param('id') id: string, @Body() locationDto: LocationDto, @ScopeUser() contextUser: IContextUser) {
         return this.orderService.track(id, locationDto);
     }
-    @HasRoles(RoleEnum.ADMIN, RoleEnum.DELIVERY)
+    @HasRoles(RoleEnum.ADMIN)
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @Put('admin/:id/status-with-reason')
+    @ApiParam({ name: 'id' })
+    updateStatusWithReasonAdmin(@Param('id') id: string, @Body() orderUpdateStatusWithReasonDto: OrderUpdateStatusWithReasonDto, @ScopeUser() contextUser: IContextUser) {
+        return this.orderService.updateStatusWithReason(id, orderUpdateStatusWithReasonDto, contextUser);
+    }
+    @HasRoles(RoleEnum.DELIVERY)
+    @ApiBearerAuth()
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Put(':id/status-with-reason')
     @ApiParam({ name: 'id' })
     updateStatusWithReason(@Param('id') id: string, @Body() orderUpdateStatusWithReasonDto: OrderUpdateStatusWithReasonDto, @ScopeUser() contextUser: IContextUser) {
@@ -113,7 +122,7 @@ export class OrderController {
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Put(':id/review')
     @ApiParam({ name: 'id' })
     async review(@Param('id') id: string, @Body() reviewDto: ReviewDto, @ScopeUser() contextUser: IContextUser) {

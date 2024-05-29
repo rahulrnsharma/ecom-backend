@@ -44,6 +44,7 @@
     "mongoose": "^7.0.0",
     "npm-check-updates": "^16.7.10",
     "passport": "^0.6.0",
+    "passport-firebase-jwt": "^1.2.1",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "razorpay": "^2.8.6",
@@ -98,4 +99,3 @@
     "testEnvironment": "node"
   }
 }
- 

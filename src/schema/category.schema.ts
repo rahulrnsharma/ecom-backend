@@ -17,6 +17,8 @@ export class Category extends Base {
     parentId: ObjectId;
     @Prop({ type: String, default: null, get: (image: string) => `${process.env.DOC_BASE_URL}category/${image}` })
     image: string;
+    @Prop({ type: Boolean, default: false })
+    home: boolean;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

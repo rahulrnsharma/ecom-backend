@@ -25,9 +25,17 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
 
     async handleDisconnect(client: ISocket) {
-        const user: any = await this.socketService.verify(
-            client.handshake.query.token
-        );
+        let user: any;
+        if (client.handshake.query.role == RoleEnum.ADMIN) {
+            user = await this.socketService.verify(
+                client.handshake.query.token
+            );
+        }
+        else {
+            const _user: any = await this.socketService.verifyFirebaseToken(client.handshake.query.token);
+            user = { user_id: _user.user_id, phone_number: _user.phone_number, userId: _user.userId, roles: [_user.role] }
+        }
+
         if ([RoleEnum.ADMIN, RoleEnum.DATAMANAGEMENT].includes(user.roles[0])) {
             this.socketService.removeAdminUserSocket(user.userId);
         }

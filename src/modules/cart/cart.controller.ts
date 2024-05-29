@@ -7,14 +7,14 @@ import { CouponValidateDto } from 'src/dto/coupon.dto';
 import { TimezoneDto } from 'src/dto/pagination.dto';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
-import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
+import { FirbaseAuthGuard } from 'src/services/guard/firebase.guard';
 import { RolesGuard } from 'src/services/guard/role.guard';
 import { UserCartService } from 'src/services/user-cart.service';
 
 @ApiTags('Cart')
 @HasRoles(RoleEnum.USER)
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(FirbaseAuthGuard, RolesGuard)
 @Controller('cart')
 export class CartController {
     constructor(private userCartService: UserCartService) { }

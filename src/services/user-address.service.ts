@@ -23,7 +23,7 @@ export class UserAddressService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async delete(id: any, contextUser: IContextUser) {
@@ -32,11 +32,11 @@ export class UserAddressService {
             return { success: true };
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
     async getAllByUser(contextUser: IContextUser): Promise<UserAddress[]> {
-        return this.userAddressModel.find({ isActive: true, user: contextUser.userId }).exec();
+        return this.userAddressModel.find({ isActive: true, user: contextUser.userId }, {}, { sort: { createdAt: -1 } }).exec();
     }
     async getById(id: any): Promise<UserAddress> {
         return this.userAddressModel.findById(id).exec();

@@ -7,6 +7,7 @@ import { DealForEnum } from 'src/enum/common.enum';
 import { RoleEnum } from 'src/enum/role.enum';
 import { IContextUser } from 'src/interface/user.interface';
 import { DealService } from 'src/services/deal.service';
+import { FirbaseAuthGuard } from 'src/services/guard/firebase.guard';
 import { JwtAuthGuard } from 'src/services/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/services/guard/role.guard';
 
@@ -23,7 +24,7 @@ export class DealController {
     }
     @HasRoles(RoleEnum.USER)
     @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @UseGuards(FirbaseAuthGuard, RolesGuard)
     @Get('by-type')
     getByType(@Query() query: SearchDealDto) {
         return this.dealService.getByType(query);

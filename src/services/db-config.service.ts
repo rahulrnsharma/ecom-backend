@@ -8,7 +8,7 @@ export class MongooseConfigService implements MongooseOptionsFactory {
 
     constructor(private configService: ConfigService) { }
 
-    createMongooseOptions(): MongooseModuleOptions { 
+    createMongooseOptions(): MongooseModuleOptions {
         return {
             uri: this.configService.get('DB_URL'),
             dbName: this.configService.get('DB_NAME'),

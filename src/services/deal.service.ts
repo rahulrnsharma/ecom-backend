@@ -26,17 +26,17 @@ export class DealService {
             return _doc
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async delete(id: any, contextUser: IContextUser) {
-        const _doc: Deal = await this.dealModel.findByIdAndUpdate(id, { isActive: false, updatedBy: contextUser.userId }, { runValidators: true }).exec();
+        const _doc: Deal = await this.dealModel.findByIdAndDelete(id).exec();
         if (_doc) {
             this.productModel.findByIdAndUpdate({ deal: new Types.ObjectId(id) }, { $set: { deal: null } }).exec();
             return { success: true };
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
     async getAll(): Promise<Deal[]> {

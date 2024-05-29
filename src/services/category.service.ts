@@ -40,7 +40,17 @@ export class CategoryService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
+        }
+    }
+
+    async updateHome(id: string, home: boolean, contextUser: IContextUser) {
+        const _doc: Category = await this.categoryModel.findByIdAndUpdate(id, { $set: { home: home, updatedBy: contextUser.userId } }, { runValidators: true }).exec();
+        if (_doc) {
+            return _doc;
+        }
+        else {
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
 
@@ -50,7 +60,7 @@ export class CategoryService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
 
@@ -76,7 +86,7 @@ export class CategoryService {
                     this.utilityService.getSkipPipeline(searchDto.currentPage, searchDto.pageSize),
                     this.utilityService.getLimitPipeline(searchDto.pageSize),
                     this.utilityService.getAddImageFieldPipeline('image', 'category', '$image'),
-                    this.utilityService.getProjectPipeline({ name: 1, image: 1, description: 1, isActive: 1 }, false)
+                    this.utilityService.getProjectPipeline({ name: 1, image: 1, description: 1, home: 1, isActive: 1 }, false)
                 ],
             },
         });

@@ -36,28 +36,24 @@ export class BannerService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are update does not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
 
     async delete(id: string, contextUser: IContextUser) {
-        const _doc: Banner = await this.bannerModel.findByIdAndUpdate(id, { isActive: false, updatedBy: contextUser.userId }, { runValidators: true }).exec();
+        const _doc: Banner = await this.bannerModel.findByIdAndDelete(id).exec();
         if (_doc) {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are delete does not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
     async getAll(): Promise<Banner[]> {
         return this.bannerModel.find({}).exec();
     }
     async getById(id: any): Promise<Banner> {
-        const banner = await this.bannerModel.findById(id).exec();
-        if (!banner) {
-            throw new BadRequestException("Resource you are looking does not exist.");
-        }
-        return banner
+        return this.bannerModel.findById(id).exec();
     }
     async getByType(type: string): Promise<Banner[]> {
         return this.bannerModel.find({ isActive: true, type: type }).exec();

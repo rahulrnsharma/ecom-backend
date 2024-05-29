@@ -12,6 +12,8 @@ import { UtilityService } from 'src/services/utility.service';
 import { SocketGateway } from 'src/socket/socket.gatway';
 import { AppUserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
+import { FirbaseAuthStrategy } from 'src/services/strategy/firebase.strategy';
+import { FirebaseService } from 'src/services/firebase.service';
 
 @Module({
     imports: [
@@ -23,7 +25,7 @@ import { AuthController } from './auth.controller';
             inject: [ConfigService]
         }), MongooseModule.forFeature([USER_SCHEMA, ADMINUSER_SCHEMA, LOGIN_SCHEMA]), AppUserModule],
     controllers: [AuthController],
-    providers: [AuthService, LocalStrategy, JwtStrategy, ApiConfigService, UtilityService, SocketService, SocketGateway],
+    providers: [AuthService, LocalStrategy, JwtStrategy, ApiConfigService, UtilityService, SocketService, SocketGateway, FirbaseAuthStrategy, FirebaseService],
     exports: [AuthService]
 })
 export class AppAuthModule { }

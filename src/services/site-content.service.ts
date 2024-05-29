@@ -13,7 +13,7 @@ export class SiteContentService {
     async create(siteContentDto: SiteContentDto, contextUser: IContextUser): Promise<SiteContent> {
         let _doc = await this.siteContentModel.findOne({ type: siteContentDto.type }).exec();
         if (_doc) {
-            throw new BadRequestException("Resource of this type already exist.");
+            throw new BadRequestException("Resource you are trying to add already exist.");
         }
         const siteContent = new this.siteContentModel({ ...siteContentDto, createdBy: contextUser.userId });
         return siteContent.save();
@@ -24,7 +24,7 @@ export class SiteContentService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are update does not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async delete(id: any, contextUser: IContextUser) {
@@ -33,7 +33,7 @@ export class SiteContentService {
             return { success: true };
         }
         else {
-            throw new BadRequestException("Resource you are delete not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
     async getAll(): Promise<SiteContent[]> {

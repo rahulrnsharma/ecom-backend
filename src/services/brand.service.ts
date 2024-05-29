@@ -38,7 +38,7 @@ export class BrandService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
 
@@ -48,7 +48,7 @@ export class BrandService {
             return _doc;
         }
         else {
-            throw new BadRequestException("Resource you are looking for not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
     async getAll(searchDto: SearchBrandDto): Promise<PaginationResponse<any>> {

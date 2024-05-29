@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { UnitDto } from "src/dto/unit.dto";
+import { SearchUnitDto, UnitDto } from "src/dto/unit.dto";
+import { ActiveStatusEnum } from "src/enum/common.enum";
 import { IContextUser } from "src/interface/user.interface";
 import { Unit, UnitDocument, UnitModel } from "src/schema/unit.schema";
 
@@ -20,7 +21,7 @@ export class UnitService {
             return _doc
         }
         else {
-            throw new BadRequestException("Resource you are update does not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async delete(id: any, contextUser: IContextUser) {
@@ -29,11 +30,15 @@ export class UnitService {
             return { success: true };
         }
         else {
-            throw new BadRequestException("Resource you are delete does not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
-    async getAll(): Promise<Unit[]> {
-        return this.unitModel.find({ isActive: true }).exec();
+    async getAll(query: SearchUnitDto): Promise<Unit[]> {
+        let _cond: any = {};
+        if (query.status) {
+            _cond['isActive'] = query.status == ActiveStatusEnum.ACTIVE;
+        }
+        return this.unitModel.find(_cond).exec();
     }
     async getById(id: any): Promise<Unit> {
         return this.unitModel.findById(id).exec();

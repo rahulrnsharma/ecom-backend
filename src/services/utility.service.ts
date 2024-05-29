@@ -188,6 +188,9 @@ export class UtilityService {
     _addField[field] = { $concat: [process.env.DOC_BASE_URL, `${folder}/`, key] };
     return { $addFields: _addField };
   }
+  projectImageFeild(folder: string, key: any) {
+    return { $concat: [process.env.DOC_BASE_URL, `${folder}/`, key] };
+  }
   getGroupPipeline(group: any): PipelineStage.Group {
     return { $group: { ...group } };
   }

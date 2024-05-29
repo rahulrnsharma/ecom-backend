@@ -11,7 +11,8 @@ import { AdminUserService } from "./admin-user.service";
 import { ApiConfigService } from "./config.service";
 import { UserService } from "./user.service";
 import { UtilityService } from "./utility.service";
-const sdk = require('api')('@msg91api/v5.0#3sl4d27aldk31ofj');
+import { FirebaseService } from "./firebase.service";
+// const sdk = require('api')('@msg91api/v5.0#3sl4d27aldk31ofj');
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,8 @@ export class AuthService {
         private userService: UserService,
         private jwtService: JwtService,
         private utilityService: UtilityService,
-        private apiConfigService: ApiConfigService
+        private apiConfigService: ApiConfigService,
+        private firebaseService: FirebaseService
     ) { }
 
     async validateAdminUser(loginDto: AdminLoginDto): Promise<any> {
@@ -98,15 +100,17 @@ export class AuthService {
     }
 
     async authCheck(authCheckDto: AuthCheckDto) {
-        const response = await this.userModel.findOne(authCheckDto);
+        let response = await this.userModel.findOne(authCheckDto);
         if (!response) {
             if (authCheckDto.role == RoleEnum.DELIVERY) {
                 throw new BadRequestException("Invalid Credentials.");
             }
-            this.userService.createUser(authCheckDto, null);
-            return { isPassword: false, isNew: true }
+            response = await this.userService.createUser(authCheckDto, null);
+            const _user = await this.firebaseService.createUser(`${authCheckDto.countryCode}${authCheckDto.mobile}`);
+            this.firebaseService.setCustomUserClaims(_user.uid, { role: response.role, userId: response._id });
+            return { isNew: true }
         } else {
-            return { isPassword: response.isPassword, isNew: false }
+            return { isNew: false }
         }
     }
 
@@ -126,33 +130,33 @@ export class AuthService {
     }
 
     async sendOtp() {
-        sdk.sendotp({
-            Param1: 'value1',
-            Param2: 'value2',
-            Param3: 'value3'
-        }, {
-            invisible: '%28Optional%29',
-            otp: '%28Optional%29',
-            userip: '%28Optional%29',
-            otp_length: '%28Optional%29',
-            otp_expiry: '%28Optional%29',
-            extra_param: '%28Optional%29',
-            unicode: '%28Optional%29',
-            template_id: '',
-            mobile: '',
-            authkey: ''
-        })
-            .then(({ data }) => console.log(data))
-            .catch(err => console.error(err));
+        // sdk.sendotp({
+        //     Param1: 'value1',
+        //     Param2: 'value2',
+        //     Param3: 'value3'
+        // }, {
+        //     invisible: '%28Optional%29',
+        //     otp: '%28Optional%29',
+        //     userip: '%28Optional%29',
+        //     otp_length: '%28Optional%29',
+        //     otp_expiry: '%28Optional%29',
+        //     extra_param: '%28Optional%29',
+        //     unicode: '%28Optional%29',
+        //     template_id: '',
+        //     mobile: '',
+        //     authkey: ''
+        // })
+        //     .then(({ data }) => console.log(data))
+        //     .catch(err => console.error(err));
     }
     async verifyOtp() {
-        sdk.verifyOtp({ otp: '1234', mobile: '919999999999' })
-            .then(({ data }) => console.log(data))
-            .catch(err => console.error(err));
+        // sdk.verifyOtp({ otp: '1234', mobile: '919999999999' })
+        //     .then(({ data }) => console.log(data))
+        //     .catch(err => console.error(err));
     }
     async resendOtp() {
-        sdk.resendOtp({ authkey: '', retrytype: '', mobile: '' })
-            .then(({ data }) => console.log(data))
-            .catch(err => console.error(err));
+        // sdk.resendOtp({ authkey: '', retrytype: '', mobile: '' })
+        //     .then(({ data }) => console.log(data))
+        //     .catch(err => console.error(err));
     }
 }

@@ -9,13 +9,15 @@ import { InquiryStatusEnum } from "src/enum/inquiry.enum";
 import { RoleEnum } from "src/enum/role.enum";
 import { IContextUser } from "src/interface/user.interface";
 import { Inquiry, InquiryDocument, InquiryModel } from "src/schema/inquiry.schema";
-import { FcmNotificationService } from "./fcm-notification.service";
+import { FirebaseService } from "./firebase.service";
 import { UtilityService } from "./utility.service";
 import { NotificationScreenEnum } from "src/enum/notification.enum";
+import { NotificationDto } from "src/dto/notification.dto";
+import { User, UserDocument, UserModel } from "src/schema/user.schema";
 
 @Injectable()
 export class InquiryService {
-    constructor(@InjectModel(InquiryModel.name) private inquiryModel: Model<InquiryDocument>, private readonly utilityService: UtilityService, private eventEmitter: EventEmitter2, private fcmNotificationService: FcmNotificationService) { }
+    constructor(@InjectModel(InquiryModel.name) private inquiryModel: Model<InquiryDocument>, @InjectModel(UserModel.name) private userModel: Model<UserDocument>, private readonly utilityService: UtilityService, private eventEmitter: EventEmitter2, private firebaseService: FirebaseService) { }
 
     async create(inquiryDto: InquiryDto, contextUser: IContextUser): Promise<any> {
         const inquiry: any = new this.inquiryModel({ type: inquiryDto.type, title: inquiryDto.title, user: contextUser.userId, createdBy: contextUser.userId, thread: [{ text: inquiryDto.text, from: contextUser.userId, role: contextUser.roles[0] }] });
@@ -34,14 +36,14 @@ export class InquiryService {
         ).exec();
         if (_doc) {
             if (contextUser.roles[0] == RoleEnum.ADMIN) {
-                this.fcmNotificationService.send(_doc.user, { notification: { title: "Inquiry Reply", body: "You hav received a reply." }, data: { url: `pmart://${NotificationScreenEnum.INQUIRYDETAIL}/${id}` } });
+                this.sendNotification(_doc.user, { notification: { title: "Inquiry Reply", body: "You hav received a reply." }, data: { url: `pmart://${NotificationScreenEnum.INQUIRYDETAIL}/${id}` } });
             }
             const _last = _doc.thread.pop();
             this.eventEmitter.emit(InquiryEventEnum.UPDATED, { inquiryId: id, role: contextUser.roles[0], user: _doc.user, thread: _last });
             return _last;
         }
         else {
-            throw new BadRequestException("Resource you are update does not exist.");
+            throw new BadRequestException("Resource you are trying to update does not exist.");
         }
     }
     async delete(id: any, contextUser: IContextUser) {
@@ -50,7 +52,7 @@ export class InquiryService {
             return { success: true };
         }
         else {
-            throw new BadRequestException("Resource you are delete does not exist.");
+            throw new BadRequestException("Resource you are trying to delete does not exist.");
         }
     }
     async close(id: any, contextUser: IContextUser) {
@@ -59,12 +61,12 @@ export class InquiryService {
             return { success: true };
         }
         else {
-            throw new BadRequestException("Resource you are close does not exist.");
+            throw new BadRequestException("Resource you are trying to close does not exist.");
         }
     }
     async getAll(searchDto: SearchInquiryDto, contextUser: any): Promise<any[]> {
         let _match: any = { isActive: true };
-        if (contextUser.roles[0] == RoleEnum.USER) {
+        if (contextUser.roles[0] != RoleEnum.ADMIN) {
             _match.user = new Types.ObjectId(contextUser.userId);
         }
         if (searchDto.status) {
@@ -81,5 +83,12 @@ export class InquiryService {
         query.push(this.utilityService.getProjectPipeline({ type: 1, status: 1, title: 1, thread: 1, createdAt: 1 }, false))
         let _res: any[] = await this.inquiryModel.aggregate(query).exec();
         return _res[0];
+    }
+
+    private async sendNotification(id: any, notification: NotificationDto) {
+        const user: User = await this.userModel.findById(id).exec();
+        if (user && user.device) {
+            this.firebaseService.sendNotification(user.device.deviceToken, notification);
+        }
     }
 }

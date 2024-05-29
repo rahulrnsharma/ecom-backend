@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     async validate(payload: any) {
         let _detail: any = await this.authService.getLoggedInDetail(payload.userId);
-        if (_detail?._id == payload.loggedInId)
+        if (_detail)//?._id == payload.loggedInId)
             return payload;
         else
             throw new UnauthorizedException()

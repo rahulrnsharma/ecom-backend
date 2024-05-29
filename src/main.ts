@@ -5,12 +5,12 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './filters/http-exception.filter';
 
-async function bootstrap() { 
+async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('v1');
   const config = new DocumentBuilder()
-    .setTitle('esale')
-    .setDescription('The esale API description')
+    .setTitle('Grocery')
+    .setDescription('The grocery API description')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -30,8 +30,6 @@ async function bootstrap() {
     }
   }));
   app.enableCors();
-  console.log(process.env.DOC_BASE_URL,"this is base url")
-  console.log(process.env.DB_URL,"This is MongoDB URL")
   await app.listen(5000);
 }
 bootstrap();
