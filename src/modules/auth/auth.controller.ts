@@ -17,7 +17,7 @@ export class AuthController {
         private authService: AuthService
     ) { }
  
-    @ApiExcludeEndpoint()
+    //@ApiExcludeEndpoint()
     @Post('create-admin')
     createAdmin(@Body() adminUserCreateDto: AdminUserCreateDto) {
         return this.authService.createAdmin(adminUserCreateDto);
