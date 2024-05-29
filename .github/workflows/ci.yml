@@ -9,11 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - name: Check for package.json changes
-        id: package-json-check
-        run: echo ::set-output name=modified::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'package.json' || true)
-
       - name: Use Node.js
         uses: actions/setup-node@v2
         with:
@@ -25,22 +20,7 @@ jobs:
       - run: |
           npm run build  # Replace with your build command, if different
           echo "npm build succuessfully done at github actions"
-
-      - name: Install Packages At Cloud
-        if: steps.package-json-check.outputs.modified
-        uses: appleboy/ssh-action@master
-        with:
-          if: steps.package-json-check.outputs.modified
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path
-            git pull origin master 
-            npm install --force
-            echo "npm install --force succuessfully done at cloud"
-             
+       
       - name: Deploy to VPS
         if: success()
         uses: appleboy/ssh-action@master
@@ -50,7 +30,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
           script: |
-            cd /usr/share/nginx/ecom-backend  # Replace with actual deployment path here
+            cd /home/moonstack/web/ecom-backend  # Replace with actual deployment path here
             git pull origin master
             npm i --force
             npm run build 
