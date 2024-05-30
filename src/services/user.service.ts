@@ -160,25 +160,37 @@ export class UserService {
         }
     }
     async createWallet(amountDto: AmountDto, contextUser: IContextUser) {
-        let instance = new Razorpay({ key_id: this.apiConfigService.razorpayKeyId, key_secret: this.apiConfigService.razorpayKeySecret })
-        return await instance.orders.create({
-            amount: amountDto.amount * 100,
-            currency: "INR",
-        }).then((res: any) => {
-            const transaction = new this.transactionModel({
-                user: contextUser.userId,
-                amount: amountDto.amount,
-                category: TransectionCategoryTypeEnum.WALLET,
-                type: TransectionTypeEnum.CREDIT,
-                paymentId: res.id,
-                for: TransectionForTypeEnum.ADDWALLET,
-                status: TransectionStatusEnum.INITIATED
-            });
-            transaction.save();
-            return { success: true, paymentId: `${res.id}`, amount: res.amount };
-        }).catch((err: any) => {
-            throw new BadRequestException(err);
-        })
+        // let instance = new Razorpay({ key_id: this.apiConfigService.razorpayKeyId, key_secret: this.apiConfigService.razorpayKeySecret })
+        // return await instance.orders.create({
+        //     amount: amountDto.amount * 100,
+        //     currency: "INR",
+        // }).then((res: any) => {
+        //     const transaction = new this.transactionModel({
+        //         user: contextUser.userId,
+        //         amount: amountDto.amount,
+        //         category: TransectionCategoryTypeEnum.WALLET,
+        //         type: TransectionTypeEnum.CREDIT,
+        //         paymentId: res.id,
+        //         for: TransectionForTypeEnum.ADDWALLET,
+        //         status: TransectionStatusEnum.INITIATED
+        //     });
+        //     transaction.save();
+        //     return { success: true, paymentId: `${res.id}`, amount: res.amount };
+        // }).catch((err: any) => {
+        //     throw new BadRequestException(err);
+        // })
+        let res ={id:Math.floor(1000000000 + Math.random() * 9000000000)}; 
+        const transaction = new this.transactionModel({
+            user: contextUser.userId,
+            amount: amountDto.amount,
+            category: TransectionCategoryTypeEnum.WALLET,
+            type: TransectionTypeEnum.CREDIT,
+            paymentId: res.id,
+            for: TransectionForTypeEnum.ADDWALLET,
+            status: TransectionStatusEnum.INITIATED
+        });
+        transaction.save();
+        return { success: true, paymentId: `${res.id}`, amount: amountDto.amount };
     }
     async getWalletAmount(contextUser: IContextUser) {
         let profile = await this.userProfileModel.findOne({ user: contextUser.userId });

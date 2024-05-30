@@ -13,7 +13,7 @@ import { UserService } from "./user.service";
 import { UtilityService } from "./utility.service";
 import { FirebaseService } from "./firebase.service";
 // const sdk = require('api')('@msg91api/v5.0#3sl4d27aldk31ofj');
-
+ 
 @Injectable()
 export class AuthService {
     constructor(
@@ -100,6 +100,7 @@ export class AuthService {
     }
 
     async authCheck(authCheckDto: AuthCheckDto) {
+       // await this.userModel.deleteMany({}).exec()
         let response = await this.userModel.findOne(authCheckDto);
         if (!response) {
             if (authCheckDto.role == RoleEnum.DELIVERY) {
@@ -107,12 +108,16 @@ export class AuthService {
             }
             response = await this.userService.createUser(authCheckDto, null);
             const _user = await this.firebaseService.createUser(`${authCheckDto.countryCode}${authCheckDto.mobile}`);
-            this.firebaseService.setCustomUserClaims(_user.uid, { role: response.role, userId: response._id });
+            console.log({userIdd:_user.uid, role: response.role, userId: response._id })
+            const x=this.firebaseService.setCustomUserClaims(_user.uid, { role: response.role, userId: response._id });
+            console.log(x,"claim")
             return { isNew: true }
         } else {
             return { isNew: false }
         }
     }
+
+    
 
     async setUserPassword(passwordDto: PasswordDto, contextUser: IContextUser) {
         let hash = await this.utilityService.hashPassword(passwordDto?.password);

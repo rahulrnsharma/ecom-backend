@@ -18,7 +18,7 @@ export class AuthController {
         private authService: AuthService
     ) { }
 
-    @ApiExcludeEndpoint()
+    //@ApiExcludeEndpoint()
     @Post('create-admin')
     createAdmin(@Body() adminUserCreateDto: AdminUserCreateDto) {
         return this.authService.createAdmin(adminUserCreateDto);
@@ -32,16 +32,16 @@ export class AuthController {
     async authCheck(@Body() authCheckDto: AuthCheckDto) {
         return this.authService.authCheck(authCheckDto);
     }
-    // @Post('login')
-    // async login(@Body() loginDto: LoginDto) {
-    //     return this.authService.login(loginDto);
-    // }
-    // @ApiBearerAuth()
-    // @UseGuards(FirbaseAuthGuard)
-    // @Post('validate')
-    // async validate(@ScopeUser() contextUser: IContextUser) {
-    //     return contextUser;
-    // }
+    @Post('login')
+    async login(@Body() loginDto: LoginDto) {
+        return this.authService.login(loginDto);
+    }
+    @ApiBearerAuth()
+    @UseGuards(FirbaseAuthGuard)
+    @Post('validate')
+    async validate(@ScopeUser() contextUser: IContextUser) {
+        return contextUser;
+    }
     @ApiBearerAuth()
     @UseGuards(FirbaseAuthGuard)
     @Post('logout')
@@ -54,13 +54,13 @@ export class AuthController {
     adminLogout(@ScopeUser() contextUser: IContextUser) {
         return this.authService.logout(contextUser);
     }
-    // @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
-    // @ApiBearerAuth()
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Post('set-password')
-    // async setUserPassword(@Body() passwordDto: PasswordDto, @ScopeUser() contextUser: IContextUser) {
-    //     return this.authService.setUserPassword(passwordDto, contextUser);
-    // }
+    @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Post('set-password')
+    async setUserPassword(@Body() passwordDto: PasswordDto, @ScopeUser() contextUser: IContextUser) {
+        return this.authService.setUserPassword(passwordDto, contextUser);
+    }
     @HasRoles(RoleEnum.USER, RoleEnum.DELIVERY)
     @ApiBearerAuth()
     @UseGuards(FirbaseAuthGuard, RolesGuard)
@@ -84,4 +84,6 @@ export class AuthController {
     profile(@ScopeUser() contextUser: IContextUser) {
         return this.authService.profile(contextUser);
     }
+
+       
 }
